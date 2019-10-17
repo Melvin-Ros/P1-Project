@@ -1,6 +1,0 @@
-busroute
-/home/ros/catkin_ws/devel/.private/busroute/cmake.lock /home/ros/catkin_ws/devel/./cmake.lock
-/home/ros/catkin_ws/devel/.private/busroute/share/busroute/cmake/busrouteConfig.cmake /home/ros/catkin_ws/devel/share/busroute/cmake/busrouteConfig.cmake
-/home/ros/catkin_ws/devel/.private/busroute/share/busroute/cmake/busrouteConfig-version.cmake /home/ros/catkin_ws/devel/share/busroute/cmake/busrouteConfig-version.cmake
-/home/ros/catkin_ws/devel/.private/busroute/lib/busroute/busroute_node /home/ros/catkin_ws/devel/lib/busroute/busroute_node
-/home/ros/catkin_ws/devel/.private/busroute/lib/pkgconfig/busroute.pc /home/ros/catkin_ws/devel/lib/pkgconfig/busroute.pc

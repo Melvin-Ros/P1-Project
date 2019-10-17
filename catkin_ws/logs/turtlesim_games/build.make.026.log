@@ -1,6 +1,0 @@
-[35m[1mScanning dependencies of target turtlesim_games_make_box[0m
-[ 16%] [32mBuilding CXX object CMakeFiles/turtlesim_games_make_box.dir/src/make_box.cpp.o[0m
-[ 50%] Built target turtlesim_games_vacuum
-[ 83%] Built target turtlesim_games_kill_turtles
-[100%] [32m[1mLinking CXX executable /home/ros/catkin_ws/devel/.private/turtlesim_games/lib/turtlesim_games/make_box[0m
-[100%] Built target turtlesim_games_make_box

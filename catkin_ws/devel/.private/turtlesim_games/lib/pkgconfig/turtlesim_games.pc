@@ -1,8 +1,0 @@
-prefix=/home/ros/catkin_ws/devel/.private/turtlesim_games
-
-Name: turtlesim_games
-Description: Description of turtlesim_games
-Version: 0.0.0
-Cflags: 
-Libs: -L/home/ros/catkin_ws/devel/.private/turtlesim_games/lib 
-Requires: 

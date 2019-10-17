@@ -1,4 +1,0 @@
-[35m[1mScanning dependencies of target busroute_node[0m
-[ 50%] [32mBuilding CXX object CMakeFiles/busroute_node.dir/src/busroute.cpp.o[0m
-[100%] [32m[1mLinking CXX executable /home/ros/catkin_ws/devel/.private/busroute/lib/busroute/busroute_node[0m
-[100%] Built target busroute_node

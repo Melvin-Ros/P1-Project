@@ -1,1 +1,0 @@
-/home/ros/catkin_ws/devel/.private/turtlesim_games/lib/pkgconfig/turtlesim_games.pc
