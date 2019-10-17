@@ -1,0 +1,10 @@
+[01m[K/home/ros/catkin_ws/src/turtlesim_games/src/make_box.cpp:[m[K In function ‘[01m[Kint main(int, char**)[m[K’:
+[01m[K/home/ros/catkin_ws/src/turtlesim_games/src/make_box.cpp:14:14:[m[K [01;31m[Kerror: [m[K‘[01m[Knull[m[K’ was not declared in this scope
+   srand(time(null));
+[01;32m[K              ^[m[K
+[01m[K/home/ros/catkin_ws/src/turtlesim_games/src/make_box.cpp:15:18:[m[K [01;31m[Kerror: [m[Kinvalid operands of types ‘[01m[Kint() throw ()[m[K’ and ‘[01m[Kint[m[K’ to binary ‘[01m[Koperator%[m[K’
+   width = rand % 50 +10;
+[01;32m[K                  ^[m[K
+make[2]: *** [CMakeFiles/turtlesim_games_make_box.dir/src/make_box.cpp.o] Error 1
+make[1]: *** [CMakeFiles/turtlesim_games_make_box.dir/all] Error 2
+make: *** [all] Error 2

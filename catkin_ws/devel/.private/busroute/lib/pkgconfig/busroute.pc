@@ -1,0 +1,8 @@
+prefix=/home/ros/catkin_ws/devel/.private/busroute
+
+Name: busroute
+Description: Description of busroute
+Version: 0.0.0
+Cflags: 
+Libs: -L/home/ros/catkin_ws/devel/.private/busroute/lib 
+Requires: 

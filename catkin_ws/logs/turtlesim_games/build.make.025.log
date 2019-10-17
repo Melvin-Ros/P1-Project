@@ -1,0 +1,19 @@
+[35m[1mScanning dependencies of target turtlesim_games_make_box[0m
+[ 16%] [32mBuilding CXX object CMakeFiles/turtlesim_games_make_box.dir/src/make_box.cpp.o[0m
+[ 50%] Built target turtlesim_games_vacuum
+[ 83%] Built target turtlesim_games_kill_turtles
+[01m[K/home/ros/catkin_ws/src/turtlesim_games/src/make_box.cpp:[m[K In function ‘[01m[Kint main(int, char**)[m[K’:
+[01m[K/home/ros/catkin_ws/src/turtlesim_games/src/make_box.cpp:13:19:[m[K [01;31m[Kerror: [m[Kunable to find numeric literal operator ‘[01m[Koperator""f[m[K’
+   float offsetX = 0f;
+[01;32m[K                   ^[m[K
+[01m[K/home/ros/catkin_ws/src/turtlesim_games/src/make_box.cpp:13:19:[m[K [01;36m[Knote: [m[Kuse -std=gnu++11 or -fext-numeric-literals to enable more built-in suffixes
+[01m[K/home/ros/catkin_ws/src/turtlesim_games/src/make_box.cpp:14:19:[m[K [01;31m[Kerror: [m[Kunable to find numeric literal operator ‘[01m[Koperator""f[m[K’
+   float offsetY = 0f;
+[01;32m[K                   ^[m[K
+[01m[K/home/ros/catkin_ws/src/turtlesim_games/src/make_box.cpp:14:19:[m[K [01;36m[Knote: [m[Kuse -std=gnu++11 or -fext-numeric-literals to enable more built-in suffixes
+CMakeFiles/turtlesim_games_make_box.dir/build.make:62: recipe for target 'CMakeFiles/turtlesim_games_make_box.dir/src/make_box.cpp.o' failed
+CMakeFiles/Makefile2:67: recipe for target 'CMakeFiles/turtlesim_games_make_box.dir/all' failed
+Makefile:138: recipe for target 'all' failed
+make[2]: *** [CMakeFiles/turtlesim_games_make_box.dir/src/make_box.cpp.o] Error 1
+make[1]: *** [CMakeFiles/turtlesim_games_make_box.dir/all] Error 2
+make: *** [all] Error 2
