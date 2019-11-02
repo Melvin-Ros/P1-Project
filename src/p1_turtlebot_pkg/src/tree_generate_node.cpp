@@ -6,18 +6,24 @@
 #include <cstdlib>
 #include <actionlib/client/simple_action_client.h>
 
+struct Coordinates { double X;double Y; };
 /** function declarations **/
 bool moveToGoal(double xGoal, double yGoal);
-
+void generatePoints(double (&points)[100][1]); 
 int main(int argc, char **argv)
 {
     ros::init(argc, argv, "example_node");
     ros::NodeHandle n("~");
     ros::Rate loop_rate(50);
+	double points[100][1];
+	generatePoints(points);
+	int count = 0;
     while (ros::ok())
     {
-		double choiceX;
-		double choiceY;
+		double choiceX = points[count][0];
+		double choiceY = points[count][1];
+
+		/*
 		std::cout << "choose whether random points or input points enter 1 or 2 ";
 		std::cin >> choiceX;
 		std::cout << std::endl;
@@ -33,11 +39,14 @@ int main(int argc, char **argv)
 		std::cout << "enter y coordinate" << std::endl;
 		std::cin >> choiceY;
 		}
-	
+		*/
+
 		if(moveToGoal(choiceX,choiceY)){
 			std::cout << "reached location:" << std::endl;
-			choiceX = 0;
-			choiceY = 0;
+			if(count <= 100){
+				count++;
+			}
+			
 		}
         ros::spinOnce();
         loop_rate.sleep();
@@ -56,7 +65,7 @@ bool moveToGoal(double xGoal, double yGoal){
 	}
 
 	move_base_msgs::MoveBaseGoal goal;
-
+	
 	//set up the frame parameters
 	goal.target_pose.header.frame_id = "map";
 	goal.target_pose.header.stamp = ros::Time::now();
@@ -85,4 +94,16 @@ bool moveToGoal(double xGoal, double yGoal){
 		return false;
 	}
 
+}
+
+void generatePoints(double (&points)[100][1]){
+	
+	for (int i = 0; i <= 100; i++)
+	{
+		srand(time(NULL)+i);
+		points[i][0] = rand()%9+1;
+		srand(time(NULL)+i+1);
+		points[i][1] = rand()%9+1;
+	}
+	
 }
