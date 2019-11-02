@@ -1,6 +1,9 @@
 #include <ros/ros.h>
 #include <move_base_msgs/MoveBaseAction.h>
 #include <iostream>
+#include <time.h>
+#include <cstdio>
+#include <cstdlib>
 #include <actionlib/client/simple_action_client.h>
 
 /** function declarations **/
@@ -15,12 +18,26 @@ int main(int argc, char **argv)
     {
 		double choiceX;
 		double choiceY;
-		std::cout << "Input x coordinate: " << std::endl;
+		std::cout << "choose whether random points or input points enter 1 or 2 ";
 		std::cin >> choiceX;
-		std::cout << "Input y coordinate: " << std::endl;
+		std::cout << std::endl;
+		if(choiceX == 1){
+		srand(time(NULL));
+		choiceX = rand()%9+1;
+		srand(time(NULL)+1);
+		choiceY = rand()%9+1;
+		}
+		else if(choiceX == 2){
+		std::cout << "enter x coordinate" << std::endl;
+		std::cin >> choiceX;
+		std::cout << "enter y coordinate" << std::endl;
 		std::cin >> choiceY;
+		}
+	
 		if(moveToGoal(choiceX,choiceY)){
 			std::cout << "reached location:" << std::endl;
+			choiceX = 0;
+			choiceY = 0;
 		}
         ros::spinOnce();
         loop_rate.sleep();
