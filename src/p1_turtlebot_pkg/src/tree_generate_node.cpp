@@ -6,12 +6,13 @@
 #include <cstdlib>
 #include <actionlib/client/simple_action_client.h>
 
-struct Coordinates { double X;double Y; };
+//struct Coordinates { double X;double Y; };  
 /** function declarations **/
 bool moveToGoal(double xGoal, double yGoal);
 void generatePoints(double (&points)[100][1]); 
 int main(int argc, char **argv)
 {
+	
     ros::init(argc, argv, "example_node");
     ros::NodeHandle n("~");
     ros::Rate loop_rate(50);
