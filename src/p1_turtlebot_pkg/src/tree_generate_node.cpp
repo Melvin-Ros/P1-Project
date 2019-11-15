@@ -102,9 +102,9 @@ void generatePoints(double (&points)[100][1]){
 	for (int i = 0; i <= 100; i++)
 	{
 		srand(time(NULL)+i);
-		points[i][0] = rand()%9+1;
+		points[i][0] = rand()%8+1;
 		srand(time(NULL)+i+1);
-		points[i][1] = rand()%9+1;
+		points[i][1] = rand()%7+1;
 	}
 	
 }
