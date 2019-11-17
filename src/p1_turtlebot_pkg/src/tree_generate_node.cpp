@@ -5,7 +5,8 @@
 #include <cstdio>
 #include <cstdlib>
 #include <actionlib/client/simple_action_client.h>
-
+#include <tf/transform_listener.h>
+using namespace std;
 //struct Coordinates { double X;double Y; };  
 /** function declarations **/
 bool moveToGoal(double xGoal, double yGoal);
@@ -15,6 +16,9 @@ int main(int argc, char **argv)
 	
     ros::init(argc, argv, "example_node");
     ros::NodeHandle n("~");
+	//create listener that gives us the coordinates of the robot from amcl
+	tf::TransformListener listener;
+
     ros::Rate loop_rate(50);
 	double points[100][1];
 	generatePoints(points);
@@ -24,6 +28,25 @@ int main(int argc, char **argv)
 		double choiceX = points[count][0];
 		double choiceY = points[count][1];
 
+		//create a time stamped transform so that we can also get previous positions and possible future positions
+		tf::StampedTransform transform;
+	//Attempt to get the position of the robot
+	try
+	{
+		/* code */
+		listener.lookupTransform("/map","/base_link",ros::Time(0), transform);
+		ROS_INFO("Got a transform! x = %f, y = %f",transform.getOrigin().x(),transform.getOrigin().y());
+		cout << "yea" << endl;
+	}
+	catch(tf::TransformException ex)
+	{
+		//ROS_ERROR("no transform", ex.what());
+		cout << "no transform send help" << endl;
+	}
+
+
+	
+	
 		/*
 		std::cout << "choose whether random points or input points enter 1 or 2 ";
 		std::cin >> choiceX;

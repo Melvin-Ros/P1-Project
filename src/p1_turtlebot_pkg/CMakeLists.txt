@@ -10,10 +10,15 @@ project(p1_turtlebot_pkg)
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   std_msgs
+  tf
+  tf_conversions
 )
 ## ACTION LIBRARY
 find_package(catkin REQUIRED genmsg actionlib_msgs actionlib)
 generate_messages(DEPENDENCIES actionlib_msgs)
+
+find_package(catkin REQUIRED genmsg tf tf_conversions)
+
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
 
