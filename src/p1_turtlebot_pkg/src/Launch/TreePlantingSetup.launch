@@ -1,0 +1,8 @@
+<launch>
+   <arg name="map_file" value="/home/ros/P1-Project/src/p1_turtlebot_pkg/src/Maps/editedmap.yaml" />
+   <node pkg="map_server" type="map_server" name="map_server" args="$(arg map_file)" />
+   <node pkg="p1_turtlebot_pkg" type="tree_generate_node.cpp" name="p1_turtlebot_pkg_node" output="screen" />
+   <include file="/opt/ros/kinetic/share/turtlebot_navigation/launch/amcl_demo.launch" />
+   <include file="/opt/ros/kinetic/share/turtlebot_rviz_launchers/launch/view_navigation.launch" />
+<launch>
+
