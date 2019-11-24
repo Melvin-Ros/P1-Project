@@ -1,135 +1,113 @@
 #include <ros/ros.h>
-#include <move_base_msgs/MoveBaseAction.h>
 #include <iostream>
 #include <time.h>
 #include <cstdio>
 #include <cstdlib>
-#include <actionlib/client/simple_action_client.h>
-#include <tf/transform_listener.h>
+#include <vector>
+#include <visualization_msgs/Marker.h>
 using namespace std;
 //struct Coordinates { double X;double Y; };  
 /** function declarations **/
-bool moveToGoal(double xGoal, double yGoal);
-void generatePoints(double (&points)[100][1]); 
+
+void generatePoints(vector<vector<double>> &points,double sizeInSquareMeters, double minXvalue, double minYvalue, double maxXvalue, double distancebetweenpoints); 
 int main(int argc, char **argv)
 {
-	
+	double sizeInSquareMeters, distancebetweenpoints,minXvalue, minYvalue, maxXvalue;
+
     ros::init(argc, argv, "example_node");
     ros::NodeHandle n("~");
-	//create listener that gives us the coordinates of the robot from amcl
-	tf::TransformListener listener;
-
+	ros::Publisher marker_pub = n.advertise<visualization_msgs::Marker>("visualization_marker", 10);
     ros::Rate loop_rate(50);
-	double points[100][1];
-	generatePoints(points);
+	vector<vector<double>> Points;
+	cout << "time to generate points input the following information: " << endl;
+	cout << "size of map in square Meters: ";
+	cin >> sizeInSquareMeters;
+	cout << endl;
+	cout << "minimum X value: ";
+	cin >> minXvalue;
+	cout << endl;
+	cout << "minimum y value: ";
+	cin >> minYvalue;
+	cout << endl;
+	cout << "maximum X value: ";
+	cin >> maxXvalue;
+	cout << endl;
+	cout << "distance between the points: ";
+	cin >> distancebetweenpoints;
+	cout << endl;
+
+	generatePoints(Points,sizeInSquareMeters,minXvalue,minYvalue,maxXvalue,distancebetweenpoints);
+
 	int count = 0;
-    while (ros::ok())
+	//Draw points in Rviz
+    while (ros::ok()&& count <= Points.size())
     {
-		double choiceX = points[count][0];
-		double choiceY = points[count][1];
+		double choiceX = Points[count][0];
+		double choiceY = Points[count][1];
 
-		//create a time stamped transform so that we can also get previous positions and possible future positions
-		tf::StampedTransform transform;
-	//Attempt to get the position of the robot
-	try
-	{
-		/* code */
-		listener.lookupTransform("/map","/base_link",ros::Time(0), transform);
-		ROS_INFO("Got a transform! x = %f, y = %f",transform.getOrigin().x(),transform.getOrigin().y());
-		cout << "yea" << endl;
-	}
-	catch(tf::TransformException ex)
-	{
-		//ROS_ERROR("no transform", ex.what());
-		cout << "no transform send help" << endl;
-	}
+		//cout << count << " " << Points[count][0] << "  " << Points[count][1] <<endl;
+		//create a marker point
+		visualization_msgs::Marker points;
+		points.header.frame_id = "map";
+		points.header.stamp = ros::Time::now();
+		points.action = visualization_msgs::Marker::ADD;
+		points.pose.orientation.w = 1.0;
+		points.id = 0;
+		points.type = visualization_msgs::Marker::POINTS;
+		points.ns = "generate_points_node";
+		// POINTS markers use x and y scale for width/height respectively
+      points.scale.x = 0.3;
+      points.scale.y = 0.3;
+	  // Points are green
+       points.color.g = 1.0f;
+       points.color.a = 1.0;
+	   //set point equal to generated points
+	   geometry_msgs::Point p;
+		p.x = choiceX;
+        p.y = choiceY;
+        p.z = 1.0;
+		points.points.push_back(p);
+		count++;
 
-
-	
-	
-		/*
-		std::cout << "choose whether random points or input points enter 1 or 2 ";
-		std::cin >> choiceX;
-		std::cout << std::endl;
-		if(choiceX == 1){
-		srand(time(NULL));
-		choiceX = rand()%9+1;
-		srand(time(NULL)+1);
-		choiceY = rand()%9+1;
-		}
-		else if(choiceX == 2){
-		std::cout << "enter x coordinate" << std::endl;
-		std::cin >> choiceX;
-		std::cout << "enter y coordinate" << std::endl;
-		std::cin >> choiceY;
-		}
-		*/
-
-		if(moveToGoal(choiceX,choiceY)){
-			std::cout << "reached location:" << std::endl;
-			if(count <= 100){
-				count++;
-			}
-			
-		}
+		marker_pub.publish(points);
         ros::spinOnce();
         loop_rate.sleep();
     }
 }
 
 
-bool moveToGoal(double xGoal, double yGoal){
+void generatePoints(vector<vector<double>> &points,double sizeInSquareMeters, double minXvalue, double minYvalue, double maxXvalue, double distancebetweenpoints){
 
-	//define a client for to send goal requests to the move_base server through a SimpleActionClient
-	actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> ac("move_base", true);
-
-	//wait for the action server to come up
-	while(!ac.waitForServer(ros::Duration(5.0))){
-		ROS_INFO("Waiting for the move_base action server to come up");
+	int n = (int)sizeInSquareMeters/(int)distancebetweenpoints;
+	int m = 1;
+	vector<vector<double>> vec(n, vector<double> (m));
+	points = vec;
+	int count=0;
+	for (int i = 0; i <= ((n/(int)maxXvalue-(int)minXvalue) + 1); i++)
+	{ 
+		
+			for (int j = 0; j < (int)maxXvalue-(int)minXvalue; j++)
+			{
+				
+				points[count+i][0] = minXvalue + j;
+				points[count+i][1] = minYvalue + i;
+				cout << count << " ";
+				cout << points[count+i][0];
+				cout << " " << points[count+i][1] << endl;
+				count++;
+			}
+			
+			
 	}
-
-	move_base_msgs::MoveBaseGoal goal;
 	
-	//set up the frame parameters
-	goal.target_pose.header.frame_id = "map";
-	goal.target_pose.header.stamp = ros::Time::now();
-
-	/* moving towards the goal*/
-	cout << "xgoal: " << xGoal << endl;
-	cout << "ygoal " << yGoal << endl;
-
-	goal.target_pose.pose.position.x =  xGoal;
-	goal.target_pose.pose.position.y =  yGoal;
-	goal.target_pose.pose.position.z =  0.0;
-	goal.target_pose.pose.orientation.x = 0.0;
-	goal.target_pose.pose.orientation.y = 0.0;
-	goal.target_pose.pose.orientation.z = 0.0;
-	goal.target_pose.pose.orientation.w = 1.0;
-
-	ROS_INFO("Sending goal location ...");
-	ac.sendGoal(goal);
-
-	ac.waitForResult();
-
-	if(ac.getState() == actionlib::SimpleClientGoalState::SUCCEEDED){
-		ROS_INFO("You have reached the destination");
-		return true;
-	}
-	else{
-		ROS_INFO("The robot failed to reach the destination");
-		return false;
-	}
-
-}
-
-void generatePoints(double (&points)[100][1]){
+	//for (int k = 0; k < n; k++)
+//	{
+	//	cout << points[k][0] << " " << points[k][1]<<endl;
+		/* code */
+	////}
 	
-	for (int i = 0; i <= 100; i++)
-	{
-		srand(time(NULL)+i);
-		points[i][0] = rand()%8+1;
-		srand(time(NULL)+i+1);
-		points[i][1] = rand()%8+1;
-	}
+	
 	
 }
+
+

@@ -12,6 +12,7 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   tf
   tf_conversions
+  visualization_msgs
 )
 ## ACTION LIBRARY
 find_package(catkin REQUIRED genmsg actionlib_msgs actionlib)
