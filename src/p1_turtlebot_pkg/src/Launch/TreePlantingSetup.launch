@@ -1,6 +1,6 @@
 <launch>
    
-   <node pkg="p1_turtlebot_pkg" type="tree_generate_node.cpp" name="p1_turtlebot_pkg_node" output="screen" />
+   
     <!-- 3D sensor -->
   <arg name="3d_sensor" default="$(env TURTLEBOT_3D_SENSOR)"/>  <!-- r200, kinect, asus_xtion_pro -->
   <include file="$(find turtlebot_bringup)/launch/3dsensor.launch">
