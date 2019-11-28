@@ -1,9 +1,0 @@
-# depslib dependency file v1.0
-1574932789 source:/home/ros/Project skitch/Turtlebot treeplanter/main.cpp
-	<iostream>
-	<stdio.h>
-	<stdlib.h>
-	<time.h>
-	<vector>
-	<math.h>
-
