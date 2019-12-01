@@ -6,28 +6,36 @@
 #include <cstdlib>
 #include <actionlib/client/simple_action_client.h>
 #include <tf/transform_listener.h>
+#include "p1_turtlebot_pkg/pointmsg.h"
 using namespace std;
-//struct Coordinates { double X;double Y; };  
+vector<geometry_msgs::Point> mypoints;
 /** function declarations **/
 bool moveToGoal(double xGoal, double yGoal);
-void generatePoints(double (&points)[100][1]); 
+void getpoints(const p1_turtlebot_pkg::pointmsg::ConstPtr& msg);
 int main(int argc, char **argv)
 {
 	
-    ros::init(argc, argv, "example_node");
+    ros::init(argc, argv, "generate_route_node");
     ros::NodeHandle n("~");
+	ros::Subscriber sub = n.subscribe("/generate_points_node/point_list", 100, getpoints);
 	//create listener that gives us the coordinates of the robot from amcl
 	tf::TransformListener listener;
 
     ros::Rate loop_rate(50);
-	double points[100][1];
-	generatePoints(points);
+	 
 	int count = 0;
-    while (ros::ok())
+	while (ros::ok)
+	{
+		/* code */
+	
+	
+    while (ros::ok()&& sub.getNumPublishers() >=0 && mypoints.size() >= 2)
     {
-		double choiceX = points[count][0];
-		double choiceY = points[count][1];
+	
 
+		double choiceX = mypoints[count].x;
+		double choiceY = mypoints[count].y;
+		
 		//create a time stamped transform so that we can also get previous positions and possible future positions
 		tf::StampedTransform transform;
 	//Attempt to get the position of the robot
@@ -45,25 +53,6 @@ int main(int argc, char **argv)
 	}
 
 
-	
-	
-		/*
-		std::cout << "choose whether random points or input points enter 1 or 2 ";
-		std::cin >> choiceX;
-		std::cout << std::endl;
-		if(choiceX == 1){
-		srand(time(NULL));
-		choiceX = rand()%9+1;
-		srand(time(NULL)+1);
-		choiceY = rand()%9+1;
-		}
-		else if(choiceX == 2){
-		std::cout << "enter x coordinate" << std::endl;
-		std::cin >> choiceX;
-		std::cout << "enter y coordinate" << std::endl;
-		std::cin >> choiceY;
-		}
-		*/
 
 		if(moveToGoal(choiceX,choiceY)){
 			std::cout << "reached location:" << std::endl;
@@ -80,9 +69,19 @@ int main(int argc, char **argv)
         ros::spinOnce();
         loop_rate.sleep();
     }
+
+	ros::spinOnce();
+    loop_rate.sleep();
+	}
 }
 
-
+void getpoints(const p1_turtlebot_pkg::pointmsg::ConstPtr& msg) {
+    //ROS_INFO("first point: x=%.2f, y=%.2f", msg->points[msg->another_field].x, msg->points[msg->another_field].y);
+	if(mypoints.size()<= 2){
+		mypoints = msg->points;
+	}
+	
+}
 bool moveToGoal(double xGoal, double yGoal){
 
 	//define a client for to send goal requests to the move_base server through a SimpleActionClient
@@ -127,14 +126,3 @@ bool moveToGoal(double xGoal, double yGoal){
 
 }
 
-void generatePoints(double (&points)[100][1]){
-	
-	for (int i = 0; i <= 100; i++)
-	{
-		srand(time(NULL)+i);
-		points[i][0] = rand()%8+1;
-		srand(time(NULL)+i+1);
-		points[i][1] = rand()%8+1;
-	}
-	
-}

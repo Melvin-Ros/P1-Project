@@ -13,10 +13,11 @@ find_package(catkin REQUIRED COMPONENTS
   tf
   tf_conversions
   visualization_msgs
+  geometry_msgs
+  message_generation
 )
 ## ACTION LIBRARY
 find_package(catkin REQUIRED genmsg actionlib_msgs actionlib)
-generate_messages(DEPENDENCIES actionlib_msgs)
 
 find_package(catkin REQUIRED genmsg tf tf_conversions)
 
@@ -54,11 +55,11 @@ find_package(catkin REQUIRED genmsg tf tf_conversions)
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
 ## Generate messages in the 'msg' folder
-# add_message_files(
-#   FILES
-#   Message1.msg
+ add_message_files(
+   FILES
+  pointmsg.msg
 #   Message2.msg
-# )
+ )
 
 ## Generate services in the 'srv' folder
 # add_service_files(
@@ -75,10 +76,14 @@ find_package(catkin REQUIRED genmsg tf tf_conversions)
 # )
 
 ## Generate added messages and services with any dependencies listed here
-# generate_messages(
-#   DEPENDENCIES
-#   std_msgs
-# )
+generate_messages(DEPENDENCIES
+actionlib_msgs
+visualization_msgs
+geometry_msgs
+visualization_msgs
+std_msgs
+)
+
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -112,7 +117,7 @@ find_package(catkin REQUIRED genmsg tf tf_conversions)
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES p1_turtlebot_pkg
-#  CATKIN_DEPENDS roscpp std_msgs
+ CATKIN_DEPENDS roscpp std_msgs geometry_msgs message_runtime
 #  DEPENDS system_lib
 )
 

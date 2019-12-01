@@ -4,6 +4,9 @@
 #include <cstdio>
 #include <cstdlib>
 #include <visualization_msgs/Marker.h>
+#include "geometry_msgs/Point.h"
+#include "p1_turtlebot_pkg/pointmsg.h"
+
 using namespace std;
 //struct Coordinates { double X;double Y; };  
 /** function declarations **/
@@ -17,10 +20,13 @@ int main(int argc, char **argv)
 {
 	double sizeOnX, sizeOnY, distancebetweenpoints,minXvalue, minYvalue;
 
-    ros::init(argc, argv, "example_node");
+    ros::init(argc, argv, "generate_points_node");
     ros::NodeHandle n("~");
-	ros::Publisher marker_pub = n.advertise<visualization_msgs::Marker>("visualization_marker", 10);
+	ros::Publisher pub = n.advertise<p1_turtlebot_pkg::pointmsg>("point_list", 100);
+	ros::Publisher marker_pub = n.advertise<visualization_msgs::Marker>("point_visualization_marker", 10);
     ros::Rate loop_rate(50);
+	visualization_msgs::Marker points;
+	p1_turtlebot_pkg::pointmsg msg;
 	vector<coordinatepoint> Points;
 	cout << "time to generate points input the following information: " << endl;
 	cout << "size of map on x axis : ";
@@ -41,22 +47,28 @@ int main(int argc, char **argv)
 	generatePoints(Points, sizeOnX,sizeOnY, minXvalue, minYvalue, distancebetweenpoints);
 
 	int count = 0;
+
+	
 	//Draw points in Rviz
-    while (ros::ok()&& count <= Points.size())
-    {
+    
+	while (count <= Points.size()&& ros::ok())
+	{
+		/* code */
+	
+	
 		double choiceX = Points[count].x;
 		double choiceY = Points[count].y;
 
-		cout << choiceX << " " << choiceY << endl;
+		//cout << choiceX << " " << choiceY << endl;
 
 		//cout << count << " " << Points[count][0] << "  " << Points[count][1] <<endl;
 		//create a marker point
-		visualization_msgs::Marker points;
+		
 		points.header.frame_id = "map";
 		points.header.stamp = ros::Time::now();
 		points.action = visualization_msgs::Marker::ADD;
 		points.pose.orientation.w = 1.0;
-		points.id = 0;
+		points.id = count;
 		points.type = visualization_msgs::Marker::POINTS;
 		points.ns = "generate_points_node";
 		// POINTS markers use x and y scale for width/height respectively
@@ -67,17 +79,27 @@ int main(int argc, char **argv)
        points.color.a = 1.0f;
 	   //set point equal to generated points
 	   geometry_msgs::Point p;
+	   
 		p.x = choiceX;
         p.y = choiceY;
         p.z = 0;
 		points.points.push_back(p);
+		msg.another_field = count;
+		msg.points.push_back(p);
 		count++;
+	}	
 
-		
+	while(marker_pub.getNumSubscribers() <= 0 || pub.getNumSubscribers() <= 0){
+		ROS_INFO("waiting for subscribers to come online");
+		ros::spinOnce();
+	}	
 		marker_pub.publish(points);
+		pub.publish(msg);
         ros::spinOnce();
         loop_rate.sleep();
-    }
+		
+    
+		
 }
 
 
