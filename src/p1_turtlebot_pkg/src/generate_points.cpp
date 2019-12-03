@@ -93,10 +93,15 @@ int main(int argc, char **argv)
 		ROS_INFO("waiting for subscribers to come online");
 		ros::spinOnce();
 	}	
+	while (ros::ok)
+	{
 		marker_pub.publish(points);
 		pub.publish(msg);
         ros::spinOnce();
         loop_rate.sleep();
+	}
+	
+		
 		
     
 		

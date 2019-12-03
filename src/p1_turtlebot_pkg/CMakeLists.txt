@@ -21,6 +21,9 @@ find_package(catkin REQUIRED genmsg actionlib_msgs actionlib)
 
 find_package(catkin REQUIRED genmsg tf tf_conversions)
 
+## Generate added messages and services with any dependencies listed here
+
+
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
 
@@ -34,25 +37,6 @@ find_package(catkin REQUIRED genmsg tf tf_conversions)
 ## Declare ROS messages, services and actions ##
 ################################################
 
-## To declare and build messages, services or actions from within this
-## package, follow these steps:
-## * Let MSG_DEP_SET be the set of packages whose message types you use in
-##   your messages/services/actions (e.g. std_msgs, actionlib_msgs, ...).
-## * In the file package.xml:
-##   * add a build_depend tag for "message_generation"
-##   * add a build_depend and a exec_depend tag for each package in MSG_DEP_SET
-##   * If MSG_DEP_SET isn't empty the following dependency has been pulled in
-##     but can be declared for certainty nonetheless:
-##     * add a exec_depend tag for "message_runtime"
-## * In this file (CMakeLists.txt):
-##   * add "message_generation" and every package in MSG_DEP_SET to
-##     find_package(catkin REQUIRED COMPONENTS ...)
-##   * add "message_runtime" and every package in MSG_DEP_SET to
-##     catkin_package(CATKIN_DEPENDS ...)
-##   * uncomment the add_*_files sections below as needed
-##     and list every .msg/.srv/.action file to be processed
-##   * uncomment the generate_messages entry below
-##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
 ## Generate messages in the 'msg' folder
  add_message_files(
@@ -74,15 +58,13 @@ find_package(catkin REQUIRED genmsg tf tf_conversions)
 #   Action1.action
 #   Action2.action
 # )
-
-## Generate added messages and services with any dependencies listed here
 generate_messages(DEPENDENCIES
 actionlib_msgs
 visualization_msgs
 geometry_msgs
-visualization_msgs
 std_msgs
 )
+
 
 
 ################################################
@@ -115,7 +97,7 @@ std_msgs
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-#  INCLUDE_DIRS include
+ # INCLUDE_DIRS include
 #  LIBRARIES p1_turtlebot_pkg
  CATKIN_DEPENDS roscpp std_msgs geometry_msgs message_runtime
 #  DEPENDS system_lib

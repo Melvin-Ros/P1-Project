@@ -7,6 +7,7 @@
 #include <actionlib/client/simple_action_client.h>
 #include <tf/transform_listener.h>
 #include "p1_turtlebot_pkg/pointmsg.h"
+
 using namespace std;
 vector<geometry_msgs::Point> mypoints;
 /** function declarations **/
@@ -24,12 +25,14 @@ int main(int argc, char **argv)
     ros::Rate loop_rate(50);
 	 
 	int count = 0;
-	while (ros::ok)
-	{
 		/* code */
+	while(mypoints.size()<=1){
+		cout << "waiting for publisher"<< endl;
+		ros::spinOnce();
+    loop_rate.sleep();
+	}
 	
-	
-    while (ros::ok()&& sub.getNumPublishers() >=0 && mypoints.size() >= 2)
+    while (ros::ok() && mypoints.size() >= 2)
     {
 	
 
@@ -56,6 +59,7 @@ int main(int argc, char **argv)
 
 		if(moveToGoal(choiceX,choiceY)){
 			std::cout << "reached location:" << std::endl;
+			//play sound
 			if(count <= 100){
 				count++;
 			}
@@ -66,13 +70,12 @@ int main(int argc, char **argv)
 				count++;
 			}
 		}
-        ros::spinOnce();
-        loop_rate.sleep();
+        
     }
 
 	ros::spinOnce();
     loop_rate.sleep();
-	}
+	
 }
 
 void getpoints(const p1_turtlebot_pkg::pointmsg::ConstPtr& msg) {
