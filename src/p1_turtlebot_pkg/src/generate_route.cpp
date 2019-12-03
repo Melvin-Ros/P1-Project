@@ -63,7 +63,7 @@ int main(int argc, char **argv)
 		if(moveToGoal(choiceX,choiceY)){
 			std::cout << "reached location:" << std::endl;
 			//play sound
-			sc.playWaveFromPkg("sound_play", "sounds/Yeetsoundeffect.wav");
+			//sc.playWaveFromPkg("sound_play", "sounds/Yeetsoundeffect.wav");
 			
 			if(count <= 100){
 				count++;
