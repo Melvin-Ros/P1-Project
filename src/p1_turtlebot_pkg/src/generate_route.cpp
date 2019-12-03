@@ -8,6 +8,7 @@
 #include <tf/transform_listener.h>
 #include "p1_turtlebot_pkg/pointmsg.h"
 using namespace std;
+#yeet
 vector<geometry_msgs::Point> mypoints;
 /** function declarations **/
 bool moveToGoal(double xGoal, double yGoal);
