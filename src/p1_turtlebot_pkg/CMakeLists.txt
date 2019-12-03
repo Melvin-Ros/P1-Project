@@ -15,6 +15,7 @@ find_package(catkin REQUIRED COMPONENTS
   visualization_msgs
   geometry_msgs
   message_generation
+  sound_play
 )
 ## ACTION LIBRARY
 find_package(catkin REQUIRED genmsg actionlib_msgs actionlib)
