@@ -8,7 +8,7 @@
 #include <actionlib/client/simple_action_client.h>
 #include <tf/transform_listener.h>
 #include "p1_turtlebot_pkg/pointmsg.h"
-
+#include "sound_play/sound_play.h"
 
 using namespace std;
 struct point
@@ -43,7 +43,7 @@ int main(int argc, char **argv)
 	
 	//create listener that gives us the coordinates of the robot from amcl
 	tf::TransformListener listener;
-
+	sound_play::SoundClient sc;
     ros::Rate loop_rate(50);
 	 
 	int count = 0;
@@ -111,7 +111,7 @@ int main(int argc, char **argv)
 		{
 			std::cout << "reached location:" << std::endl;
 			//play sound
-			//sc.playWaveFromPkg("sound_play", "sounds/Yeetsoundeffect.wav");
+			sc.playWave("/Home/ros/P1-Project/src/p1_turtlebot_pkg/src/crow_call_2.wav");
 			
 			if(count <= 100)
 			{
