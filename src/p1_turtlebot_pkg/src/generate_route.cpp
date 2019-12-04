@@ -111,7 +111,7 @@ int main(int argc, char **argv)
 		{
 			std::cout << "reached location:" << std::endl;
 			//play sound
-			sc.playWave("/Home/ros/P1-Project/src/p1_turtlebot_pkg/src/crow_call_2.wav");
+			sc.playWave("/Home/ros/P1-Project/src/p1_turtlebot_pkg/src/crow_call_2.wav", 1.0f);
 			
 			if(count <= 100)
 			{
