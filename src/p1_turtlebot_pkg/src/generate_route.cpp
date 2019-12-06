@@ -65,7 +65,6 @@ int main(int argc, char **argv)
 				temp.inRoute = false;
 				pointArray.push_back(temp);
 			}
-		
 		}
 
 //create a time stamped transform so that we can also get previous positions and possible future positions
