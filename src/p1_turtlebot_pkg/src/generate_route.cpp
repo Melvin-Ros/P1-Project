@@ -17,12 +17,14 @@ double x;
 double y;
 bool inRoute;
 };
+
 struct line
 {
 point firstPoint, secondPoint;
 double a, b;
 bool vertical;
 };
+
 vector<geometry_msgs::Point> mypoints;
 vector<point> pointArray;
 /** function declarations **/
@@ -31,12 +33,11 @@ void getpoints(const p1_turtlebot_pkg::pointmsg::ConstPtr& msg);
 void greedyRouteGen(vector<point> &pointArray, point currentPosition);
 line lineFormCalc (line calcLine);
 bool intersectCheck(line currentLine, line testline);
-void routeModifier(vector<point> &pointArray);
+void routeModifier(vector<point> &pointArray, point currentPosition);
 
 
 int main(int argc, char **argv)
-{
-	
+{	
     ros::init(argc, argv, "generate_route_node");
     ros::NodeHandle n("~");
 	ros::Subscriber sub = n.subscribe("/generate_points_node/point_list", 100, getpoints);
@@ -55,103 +56,101 @@ int main(int argc, char **argv)
     	loop_rate.sleep();
 	}
 	
-		if(mypoints.size()>=1)
+	if(mypoints.size()>=1)
+	{
+		for(int i = 0; i <= mypoints.size(); i++)
 		{
-			for(int i = 0; i <= mypoints.size(); i++)
-			{
-				point temp;
-				temp.x = mypoints[i].x;
-				temp.y = mypoints[i].y;
-				temp.inRoute = false;
-				pointArray.push_back(temp);
-			}
-		
-		}
+			point temp;
+			temp.x = mypoints[i].x;
+			temp.y = mypoints[i].y;
+			temp.inRoute = false;
+			pointArray.push_back(temp);
+		}		
+	}
 
-//create a time stamped transform so that we can also get previous positions and possible future positions
-		tf::StampedTransform transform;
-		point currentPosition;
-		currentPosition.inRoute = true;
-		//Attempt to get the position of the robot
-		try
-		{
-			/* code */
-			listener.lookupTransform("/map","/base_link",ros::Time(0), transform);
-			ROS_INFO("Got a transform! x = %f, y = %f",transform.getOrigin().x(),transform.getOrigin().y());
-			currentPosition.x = transform.getOrigin().x();
-			currentPosition.y = transform.getOrigin().y();
-			currentPosition.inRoute = false;
-			cout << "yea" << endl;
-		}
-		catch(tf::TransformException ex)
-		{
-			//ROS_ERROR("no transform", ex.what());
-			cout << "no transform send help" << endl;
-		}
+	//create a time stamped transform so that we can also get previous positions and possible future positions
+	tf::StampedTransform transform;
+	point currentPosition;
+	currentPosition.inRoute = true;
+	//Attempt to get the position of the robot
+	try
+	{
+		/* code */
+		listener.lookupTransform("/map","/base_link",ros::Time(0), transform);
+		ROS_INFO("Got a transform! x = %f, y = %f",transform.getOrigin().x(),transform.getOrigin().y());
+		currentPosition.x = transform.getOrigin().x();
+		currentPosition.y = transform.getOrigin().y();
+		currentPosition.inRoute = false;
+		cout << "yea" << endl;
+	}
+	catch(tf::TransformException ex)
+	{
+		//ROS_ERROR("no transform", ex.what());
+		cout << "no transform send help" << endl;
+	}
 		
-	
-		greedyRouteGen(pointArray, currentPosition);
-		routeModifier(pointArray);
-		for	(int p; p<pointArray.size(); p++)
+	greedyRouteGen(pointArray, currentPosition);
+	int doModifier;
+	cout << "Run the route modifier?(0=no): ";
+	cin >> doModifier;
+	if (doModifier != 0)
+	{
+		cout << "running the modifier" << endl;
+		routeModifier(pointArray, currentPosition);		
+	}
+	else
+	{
+		cout << "skipping the modifier" << endl;
+	}
+
+	for	(int i; i<pointArray.size(); i++)
+	{
+		if (i==0) 
 		{
-			cout << pointArray[p].x << " , " << pointArray[p].y << ": " << endl;
+			cout << "[";
 		}
+		cout << pointArray[i].x << "," << pointArray[i].y;
+		string placement = (i==pointArray.size()-1) ? "]\n" : ": ";
+		cout << placement;
+	}
 		 
-    while (ros::ok() && pointArray.size() >= 2)
+    for (int i = 0; i < pointArray.size() && ros::ok(); i++)
     {	
-		
-
-		int temp;
-		cin >> temp;
-		
-		double choiceX = pointArray[count].x;
-		double choiceY = pointArray[count].y;
-
-		if(moveToGoal(choiceX,choiceY))
+		if(moveToGoal(pointArray[i].x,pointArray[i].y))
 		{
 			std::cout << "reached location:" << std::endl;
 			//play sound
 			sc.playWave("/Home/ros/P1-Project/src/p1_turtlebot_pkg/src/crow_call_2.wav", 1.0f);
-			
-			if(count <= 100)
-			{
-				count++;
-			}
 		}
-		else if(!moveToGoal(choiceX,choiceY))
+		else
 		{
 			std::cout << "location: not reached going to next goal" << std::endl;
-			
-			if(count <= 100)
-			{
-				count++;
-			}
 		}
-        
     }
-
+	cout << "Route finished" << endl;
 	ros::spinOnce();
     loop_rate.sleep();
-	
 } 
 
 
-void getpoints(const p1_turtlebot_pkg::pointmsg::ConstPtr& msg) {
+void getpoints(const p1_turtlebot_pkg::pointmsg::ConstPtr& msg) 
+{
     //ROS_INFO("first point: x=%.2f, y=%.2f", msg->points[msg->another_field].x, msg->points[msg->another_field].y);
-	if(mypoints.size()<= 1){
+	if(mypoints.size()<= 1)
+	{
 		mypoints = msg->points;
 	}
-	
 }
 
 
-bool moveToGoal(double xGoal, double yGoal){
-
+bool moveToGoal(double xGoal, double yGoal)
+{
 	//define a client for to send goal requests to the move_base server through a SimpleActionClient
 	actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> ac("move_base", true);
 
 	//wait for the action server to come up
-	while(!ac.waitForServer(ros::Duration(5.0))){
+	while(!ac.waitForServer(ros::Duration(5.0)))
+	{
 		ROS_INFO("Waiting for the move_base action server to come up");
 	}
 
@@ -161,9 +160,9 @@ bool moveToGoal(double xGoal, double yGoal){
 	goal.target_pose.header.frame_id = "map";
 	goal.target_pose.header.stamp = ros::Time::now();
 
-	/* moving towards the goal*/
-	cout << "xgoal: " << xGoal << endl;
-	cout << "ygoal " << yGoal << endl;
+	// moving towards the goal
+	cout << "xGoal: " << xGoal << endl;
+	cout << "yGoal: " << yGoal << endl;
 
 	goal.target_pose.pose.position.x =  xGoal;
 	goal.target_pose.pose.position.y =  yGoal;
@@ -178,15 +177,17 @@ bool moveToGoal(double xGoal, double yGoal){
 	
 	ac.waitForResult();
 
-	if(ac.getState() == actionlib::SimpleClientGoalState::SUCCEEDED){
-		ROS_INFO("You have reached the destination");
+
+	if	(ac.getState() == actionlib::SimpleClientGoalState::SUCCEEDED)
+	{
+		ROS_INFO("the robot has succeeded in reaching the destination");
 		return true;
 	}
-	else{
-		ROS_INFO("The robot failed to reach the destination");
+	else
+	{
+		ROS_INFO("the robot has failed in reaching the destination");
 		return false;
 	}
-
 }
 
 void greedyRouteGen(vector<point> &pointArray, point currentPosition)
@@ -194,29 +195,9 @@ void greedyRouteGen(vector<point> &pointArray, point currentPosition)
     vector<point> routeOrder;
     double shortestDist, currentDist;
     int bestPoint;
+    routeOrder.insert(routeOrder.begin(), currentPosition);
 
-    shortestDist = hypot((currentPosition.x - pointArray[0].x), (currentPosition.y - pointArray[0].y));
-    bestPoint=0;
-
-    for (int i=0; i<pointArray.size();i++)
-    {
-        currentDist = hypot((currentPosition.x - pointArray[i].x), (currentPosition.y - pointArray[i].y));
-        if(currentDist<shortestDist)
-        {
-            bestPoint=i;
-            shortestDist=currentDist;
-            //cout << "It is. Setting current shortest distance to " << shortestDist << endl;
-        }
-        else
-        {
-            //cout << "It isn't" << endl;
-        }
-    }
-
-    routeOrder.push_back(pointArray[bestPoint]);
-    pointArray[bestPoint].inRoute=true;
-
-    for (int n=0; n<pointArray.size()-1;n++)
+    for (int n=0; n<pointArray.size();n++)
     {
         int r = -1;
         do
@@ -228,31 +209,26 @@ void greedyRouteGen(vector<point> &pointArray, point currentPosition)
                 shortestDist = hypot((routeOrder[n].x - pointArray[r].x), (routeOrder[n].y - pointArray[r].y));
             }
         }
-        while (pointArray[r].inRoute);
+        while (pointArray[r].inRoute && r < pointArray.size());
 
         for (int i=0; i<pointArray.size();i++)
         {
             if (!pointArray[i].inRoute)
             {
                 currentDist = hypot((routeOrder[n].x - pointArray[i].x), (routeOrder[n].y - pointArray[i].y));
-                //cout << "the distance from point " << n << " to point " << i << " is: " << currentDist << endl;
-                //cout << "Testing if " << currentDist << " is lower than " << shortestDist << endl;
                 if(currentDist<shortestDist)
                 {
                     bestPoint=i;
                     shortestDist=currentDist;
-                    //cout << "It is. Setting current shortest distance to " << shortestDist << endl;
-                }
-                else
-                {
-                    //cout << "It isn't" << endl;
                 }
             }
         }
+
         routeOrder.push_back(pointArray[bestPoint]);
         pointArray[bestPoint].inRoute=true;
     }
 
+    routeOrder.erase(routeOrder.begin());
     routeOrder.push_back(currentPosition);
     pointArray=routeOrder;
 }
@@ -267,194 +243,143 @@ line lineFormCalc (line calcLine)
     }
     else
     {
-        calcLine.a = 1000;
+        calcLine.a = 9001;
         calcLine.b = (calcLine.firstPoint.x);
         calcLine.vertical=true;
     }
 
     return calcLine;
 }
+
+
 bool intersectCheck(line currentLine, line testline)
 {
-    point intersectionPlacement;
+	if (currentLine.a != testline.a)
+	{
+	    point intersectionPlacement;
+		if (currentLine.vertical)
+		{
+			intersectionPlacement.x = currentLine.firstPoint.x;
+			intersectionPlacement.y = ((testline.a*intersectionPlacement.x)+testline.b);
 
-    if (currentLine.vertical)
-    {
-        intersectionPlacement.x = currentLine.firstPoint.x;
-        intersectionPlacement.y = ((testline.a*intersectionPlacement.x)+testline.b);
+			if ((currentLine.firstPoint.y <= intersectionPlacement.y && intersectionPlacement.y <= currentLine.secondPoint.y) ||
+				(currentLine.firstPoint.y >= intersectionPlacement.y && intersectionPlacement.y >= currentLine.secondPoint.y))
+			{
+					if ((testline.firstPoint.x <= intersectionPlacement.x && intersectionPlacement.x <= testline.secondPoint.x) ||
+						(testline.firstPoint.x >= intersectionPlacement.x && intersectionPlacement.x >= testline.secondPoint.x))
+					{
+						return true;
+					}
+					else
+					{
+						return false;
+					}
+			}
+			else
+			{
+				return false;
+			}
+		}
+		else if (testline.vertical)
+		{
+			intersectionPlacement.x = testline.firstPoint.x;
+			intersectionPlacement.y = ((currentLine.a*intersectionPlacement.x)+currentLine.b);
 
-        if (currentLine.firstPoint.y <= intersectionPlacement.y && intersectionPlacement.y <= currentLine.secondPoint.y)
-        {
-                if (testline.firstPoint.x <= intersectionPlacement.x && intersectionPlacement.x <= testline.firstPoint.x)
-                {
-                    return true;
-                }
-                else if (testline.firstPoint.x >= intersectionPlacement.x && intersectionPlacement.x >= testline.secondPoint.x)
-                {
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-        }
-        else if (currentLine.firstPoint.y >= intersectionPlacement.y && intersectionPlacement.y >= currentLine.secondPoint.y)
-        {
-                if (testline.firstPoint.x <= intersectionPlacement.x && intersectionPlacement.x <= testline.firstPoint.x)
-                {
-                    return true;
-                }
-                else if (testline.firstPoint.x >= intersectionPlacement.x && intersectionPlacement.x >= testline.secondPoint.x)
-                {
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-        }
-        else
-        {
-            return false;
-        }
-    }
-    else if (testline.vertical)
-    {
-        intersectionPlacement.x = testline.firstPoint.x;
-        intersectionPlacement.y = ((currentLine.a*intersectionPlacement.x)+currentLine.b);
+			if ((currentLine.firstPoint.x <= intersectionPlacement.x && intersectionPlacement.x <= currentLine.secondPoint.x) ||
+				(currentLine.firstPoint.x >= intersectionPlacement.x && intersectionPlacement.x >= currentLine.secondPoint.x))
+			{
+					if ((testline.firstPoint.y <= intersectionPlacement.y && intersectionPlacement.y <= testline.firstPoint.y) ||
+						(testline.firstPoint.y >= intersectionPlacement.y && intersectionPlacement.y >= testline.secondPoint.y))
+					{
+						return true;
+					}
+					else
+					{
+						return false;
+					}
+			}
+			else
+			{
+				return false;
+			}
+		}
+		else
+		{
+			intersectionPlacement.x = ((testline.b-currentLine.b)/(currentLine.a-testline.a));
+			intersectionPlacement.y = ((currentLine.a*intersectionPlacement.x)+currentLine.b);
 
-        if (currentLine.firstPoint.x <= intersectionPlacement.x && intersectionPlacement.x <= currentLine.secondPoint.x)
-        {
-                if (testline.firstPoint.y <= intersectionPlacement.y && intersectionPlacement.y <= testline.firstPoint.y)
-                {
-                    return true;
-                }
-                else if (testline.firstPoint.y >= intersectionPlacement.y && intersectionPlacement.y >= testline.secondPoint.y)
-                {
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-        }
-        else if (currentLine.firstPoint.x >= intersectionPlacement.x && intersectionPlacement.x >= currentLine.secondPoint.x)
-        {
-                if (testline.firstPoint.y <= intersectionPlacement.y && intersectionPlacement.y <= testline.firstPoint.y)
-                {
-                    return true;
-                }
-                else if (testline.firstPoint.y >= intersectionPlacement.y && intersectionPlacement.y >= testline.secondPoint.y)
-                {
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-        }
-        else
-        {
-            return false;
-        }
-    }
-    else
-    {
-        intersectionPlacement.x = ((testline.b-currentLine.b)/(currentLine.a-testline.a));
-        intersectionPlacement.y = ((currentLine.a*intersectionPlacement.x)+currentLine.b);
-
-        if (currentLine.firstPoint.x <= intersectionPlacement.x && intersectionPlacement.x <= currentLine.secondPoint.x)
-        {
-                if (testline.firstPoint.x <= intersectionPlacement.x && intersectionPlacement.x <= testline.firstPoint.x)
-                {
-                    return true;
-                }
-                else if (testline.firstPoint.x >= intersectionPlacement.x && intersectionPlacement.x >= testline.secondPoint.x)
-                {
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-        }
-        else if (currentLine.firstPoint.x >= intersectionPlacement.x && intersectionPlacement.x >= currentLine.secondPoint.x)
-        {
-                if (testline.firstPoint.x <= intersectionPlacement.x && intersectionPlacement.x <= testline.firstPoint.x)
-                {
-                    return true;
-                }
-                else if (testline.firstPoint.x >= intersectionPlacement.x && intersectionPlacement.x >= testline.secondPoint.x)
-                {
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-        }
-        else
-        {
-            return false;
-        }
-    }
+			if ((currentLine.firstPoint.x <= intersectionPlacement.x && intersectionPlacement.x <= currentLine.secondPoint.x) ||
+				(currentLine.firstPoint.x >= intersectionPlacement.x && intersectionPlacement.x >= currentLine.secondPoint.x))
+			{
+					if ((testline.firstPoint.x <= intersectionPlacement.x && intersectionPlacement.x <= testline.secondPoint.x) ||
+						(testline.firstPoint.x >= intersectionPlacement.x && intersectionPlacement.x >= testline.secondPoint.x))
+					{
+						return true;
+					}
+					else
+					{
+						return false;
+					}
+			}
+			else
+			{
+				return false;
+			}
+		}
+	}
+	else if (currentLine.a == testline.a && currentLine.b == testline.b)
+	{
+		if (currentLine.vertical)
+		{
+			if ((currentLine.firstPoint.y <= testline.firstPoint.y && testline.firstPoint.y <= currentLine.secondPoint.y) ||
+				(currentLine.firstPoint.y >= testline.firstPoint.y && testline.firstPoint.y >= currentLine.secondPoint.y) ||
+				(currentLine.firstPoint.y <= testline.secondPoint.y && testline.secondPoint.y <= currentLine.secondPoint.y) ||
+				(currentLine.firstPoint.y >= testline.secondPoint.y && testline.secondPoint.y >= currentLine.secondPoint.y) ||
+				(testline.firstPoint.y <= currentLine.firstPoint.y && currentLine.firstPoint.y <= testline.secondPoint.y) ||
+				(testline.firstPoint.y >= currentLine.firstPoint.y && currentLine.firstPoint.y >= testline.secondPoint.y))
+			{
+				return true;
+			}
+			else
+			{
+				return false;
+			}
+		}
+		else
+		{
+			if ((currentLine.firstPoint.x <= testline.firstPoint.x && testline.firstPoint.x <= currentLine.secondPoint.x) ||
+				(currentLine.firstPoint.x >= testline.firstPoint.x && testline.firstPoint.x >= currentLine.secondPoint.x) ||
+				(testline.firstPoint.x <= currentLine.firstPoint.x && currentLine.firstPoint.x <= testline.secondPoint.x) ||
+				(testline.firstPoint.x >= currentLine.firstPoint.x && currentLine.firstPoint.x >= testline.secondPoint.x) ||
+				(currentLine.firstPoint.x <= testline.secondPoint.x && testline.secondPoint.x <= currentLine.secondPoint.x) ||
+				(currentLine.firstPoint.x >= testline.secondPoint.x && testline.secondPoint.x >= currentLine.secondPoint.x))
+			{
+				return true;
+			}
+			else
+			{
+				return false;
+			}			
+		}
+	}
+	else
+	{
+		return false;
+	}
 }
 
 
-void routeModifier(vector<point> &pointArray)
+void routeModifier(vector<point> &pointArray, point currentPosition)
 {
     line currentLine;
     line testLine;
     bool intersected;
-    int breaker;
-
-    breaker = 0;
-    currentLine.firstPoint = pointArray[pointArray.size()];
-    currentLine.secondPoint = pointArray[0];
-    currentLine = lineFormCalc(currentLine);
+    pointArray.insert(pointArray.begin(), currentPosition);
 
     do
     {
         intersected = false;
-
-        for (int i = 1; i < pointArray.size()-2; i++)
-        {
-            testLine.firstPoint = pointArray[i];
-            testLine.secondPoint = pointArray[i+1];
-            testLine = lineFormCalc(testLine);
-
-            if (currentLine.a != testLine.a)
-            {
-
-                bool isIntersected = intersectCheck(currentLine, testLine);
-                if (isIntersected)
-                {
-                    cout << "The line between (" << currentLine.firstPoint.x << "," << currentLine.firstPoint.y << ") and (" << currentLine.secondPoint.x << "," << currentLine.secondPoint.y <<
-                    ") \nintersects with the line between (" << testLine.firstPoint.x << "," << testLine.firstPoint.y << ") and (" << testLine.secondPoint.x << "," << testLine.secondPoint.y << ")" << endl;
-
-                    double crossedLength, uncrossedLength;
-                    crossedLength = hypot((currentLine.firstPoint.x - currentLine.secondPoint.x), (currentLine.firstPoint.y - currentLine.secondPoint.y)) + hypot((testLine.firstPoint.x - testLine.secondPoint.x), (testLine.firstPoint.y - testLine.secondPoint.y));
-                    uncrossedLength = hypot((currentLine.firstPoint.x - testLine.firstPoint.x), (currentLine.firstPoint.y - testLine.firstPoint.y)) + hypot((currentLine.secondPoint.x - testLine.secondPoint.x), (currentLine.secondPoint.y - testLine.secondPoint.y));
-                    if (uncrossedLength < crossedLength)
-                    {
-                        point tempPoint;
-                        for (int f = 0, g = i; f < g; f++, g--)
-                        {
-                            cout << "exchanging point " << f << " and point " << g << endl;
-                            tempPoint = pointArray[f];
-                            pointArray[f] = pointArray[g];
-                            pointArray[g] = tempPoint;
-                        }
-                        intersected = true;
-                    }
-                }
-                else
-                {
-                    //cout << "It doesn't" << endl;
-                }
-            }
-        }
-
+		double crossedLength, uncrossedLength;
 
         for (int p = 0; p < pointArray.size()-1; p++)
         {
@@ -468,38 +393,26 @@ void routeModifier(vector<point> &pointArray)
                 testLine.secondPoint = pointArray[i+1];
                 testLine = lineFormCalc(testLine);
 
-                if (currentLine.a != testLine.a)
+                if (intersectCheck(currentLine, testLine))
                 {
-
-                    bool isIntersected = intersectCheck(currentLine, testLine);
-                    if (isIntersected)
+                    crossedLength = hypot((currentLine.firstPoint.x - currentLine.secondPoint.x), (currentLine.firstPoint.y - currentLine.secondPoint.y)) + hypot((testLine.firstPoint.x - testLine.secondPoint.x), (testLine.firstPoint.y - testLine.secondPoint.y));
+                    uncrossedLength = hypot((currentLine.firstPoint.x - testLine.firstPoint.x), (currentLine.firstPoint.y - testLine.firstPoint.y)) + hypot((currentLine.secondPoint.x - testLine.secondPoint.x), (currentLine.secondPoint.y - testLine.secondPoint.y));
+                    if (uncrossedLength < crossedLength)
                     {
-                        cout << "The line between (" << currentLine.firstPoint.x << "," << currentLine.firstPoint.y << ") and (" << currentLine.secondPoint.x << "," << currentLine.secondPoint.y <<
-                        ") intersects with \nthe line between (" << testLine.firstPoint.x << "," << testLine.firstPoint.y << ") and (" << testLine.secondPoint.x << "," << testLine.secondPoint.y << ")" << endl;
+						intersected = true;
 
-                        double crossedLength, uncrossedLength;
-                        crossedLength = hypot((currentLine.firstPoint.x - currentLine.secondPoint.x), (currentLine.firstPoint.y - currentLine.secondPoint.y)) + hypot((testLine.firstPoint.x - testLine.secondPoint.x), (testLine.firstPoint.y - testLine.secondPoint.y));
-                        uncrossedLength = hypot((currentLine.firstPoint.x - testLine.firstPoint.x), (currentLine.firstPoint.y - testLine.firstPoint.y)) + hypot((currentLine.secondPoint.x - testLine.secondPoint.x), (currentLine.secondPoint.y - testLine.secondPoint.y));
-                        if (uncrossedLength < crossedLength)
+                        for (int f = p+1, g = i; f < g; f++, g--)
                         {
-                            point tempPoint;
-                            for (int f = p+1, g = i; f < g; f++, g--)
-                            {
-                                cout << "exchanging point " << f << " and point " << g << endl;
-                                tempPoint = pointArray[f];
-                                pointArray[f] = pointArray[g];
-                                pointArray[g] = tempPoint;
-                            }
-                            intersected = true;
+                            point tempPoint = pointArray[f];
+                            pointArray[f] = pointArray[g];
+                            pointArray[g] = tempPoint;
                         }
-                    }
-                    else
-                    {
-                        //cout << "It doesn't" << endl;
                     }
                 }
             }
         }
     }
     while (intersected);
+
+    pointArray.erase(pointArray.begin());
 }
