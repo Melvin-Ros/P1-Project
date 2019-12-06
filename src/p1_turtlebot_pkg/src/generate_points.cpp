@@ -5,46 +5,63 @@
 #include <cstdlib>
 #include <visualization_msgs/Marker.h>
 #include "geometry_msgs/Point.h"
+#include <nav_msgs/MapMetaData.h>
+#include <nav_msgs/OccupancyGrid.h>
+#include "std_msgs/Header.h"
+#include "nav_msgs/MapMetaData.h"
 #include "p1_turtlebot_pkg/pointmsg.h"
 
 using namespace std;
+nav_msgs::OccupancyGrid occupancygrid;
+bool isoccupied = false;
 //struct Coordinates { double X;double Y; };  
 /** function declarations **/
 struct coordinatepoint{
 	double x;
 	double y;
 };
+vector<coordinatepoint> availablepoints;
+void generatePoints(vector<coordinatepoint> &points,double distancebetweenpoints); 
+void mapCallback(const nav_msgs::OccupancyGrid::ConstPtr& msg){
+  occupancygrid.header = msg->header;
 
-void generatePoints(vector<coordinatepoint> &points,double sizeOnX, double sizeOnY, double minXvalue, double minYvalue, double distancebetweenpoints); 
+
+  occupancygrid.info = msg->info;
+  occupancygrid.data = msg->data;
+  isoccupied = true;
+   
+  
+ 
+     
+}
 int main(int argc, char **argv)
 {
-	double sizeOnX, sizeOnY, distancebetweenpoints,minXvalue, minYvalue;
+	double  distancebetweenpoints;
 
     ros::init(argc, argv, "generate_points_node");
     ros::NodeHandle n("~");
 	ros::Publisher pub = n.advertise<p1_turtlebot_pkg::pointmsg>("point_list", 100);
 	ros::Publisher marker_pub = n.advertise<visualization_msgs::Marker>("point_visualization_marker", 10);
-    ros::Rate loop_rate(50);
+     ros::Subscriber map_sub = n.subscribe("/map",2000,mapCallback);
+	ros::Rate loop_rate(50);
 	visualization_msgs::Marker points;
 	p1_turtlebot_pkg::pointmsg msg;
 	vector<coordinatepoint> Points;
 	cout << "time to generate points input the following information: " << endl;
-	cout << "size of map on x axis : ";
-	cin >> sizeOnX;
-	cout << "size of map on y axis : ";
-	cin >> sizeOnY;
-	cout << endl;
-	cout << "minimum X value: ";
-	cin >> minXvalue;
-	cout << endl;
-	cout << "minimum y value: ";
-	cin >> minYvalue;
-	cout << endl;
+
 	cout << "distance between the points: ";
 	cin >> distancebetweenpoints;
 	cout << endl;
-
-	generatePoints(Points, sizeOnX,sizeOnY, minXvalue, minYvalue, distancebetweenpoints);
+	while(marker_pub.getNumSubscribers() <= 0 || pub.getNumSubscribers() <= 0 || map_sub.getNumPublishers() <= 0){
+		ROS_INFO("waiting for subscribers to come online");
+		ros::spinOnce();
+	}	
+	while(isoccupied == false){
+		ros::spinOnce();
+		loop_rate.sleep();
+	}
+	
+	generatePoints(Points, distancebetweenpoints);
 
 	int count = 0;
 
@@ -89,10 +106,7 @@ int main(int argc, char **argv)
 		count++;
 	}	
 
-	while(marker_pub.getNumSubscribers() <= 0 || pub.getNumSubscribers() <= 0){
-		ROS_INFO("waiting for subscribers to come online");
-		ros::spinOnce();
-	}	
+	
 	while (ros::ok)
 	{
 		marker_pub.publish(points);
@@ -108,20 +122,28 @@ int main(int argc, char **argv)
 }
 
 
-void generatePoints(vector<coordinatepoint> &points,double sizeonX, double sizeonY, double minXvalue, double minYvalue, double distancebetweenpoints){
-
-for (int i = 0; i <= sizeonY/distancebetweenpoints; i++)
-{
-	coordinatepoint temp;
-	for (int j = 0; j <= sizeonX/distancebetweenpoints; j++)
-	{
-		temp.x= minXvalue +(distancebetweenpoints*j);
-		temp.y = minYvalue + (distancebetweenpoints*i);
-		//cout << temp.x << " " << temp.y << endl;
-		points.push_back(temp);
-		//cout <<  minXvalue +(distancebetweenpoints*j) << " " << minYvalue + (distancebetweenpoints*i) << endl;
-			}
+void generatePoints(vector<coordinatepoint> &points,double distancebetweenpoints){
 	
+for (unsigned int x = occupancygrid.info.origin.position.x; x <= occupancygrid.info.width; x+=(int)(distancebetweenpoints/occupancygrid.info.resolution))
+{
+	
+	coordinatepoint temp;
+    for (unsigned int y = occupancygrid.info.origin.position.y; y <= occupancygrid.info.height; y+=(int)(distancebetweenpoints/occupancygrid.info.resolution))
+      {
+		  
+	  temp.y = y;
+	  temp.x = x;
+
+       
+	  if(occupancygrid.data[(int)(temp.y *(occupancygrid.info.width)+temp.x)] != -1 && occupancygrid.data[int(temp.y  *(occupancygrid.info.width)+temp.x)] == 0)
+	  {
+		  temp.y *= occupancygrid.info.resolution;
+		  temp.x *= occupancygrid.info.resolution;
+		  cout << temp.x <<  " " << temp.y << endl;
+		  points.push_back(temp);
+	  }
+
+	  }
 }
 
 	

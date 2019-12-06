@@ -60,6 +60,7 @@ int main(int argc, char **argv)
 	{
 		for(int i = 0; i <= mypoints.size(); i++)
 		{
+<<<<<<< HEAD
 			point temp;
 			temp.x = mypoints[i].x;
 			temp.y = mypoints[i].y;
@@ -67,6 +68,17 @@ int main(int argc, char **argv)
 			pointArray.push_back(temp);
 		}		
 	}
+=======
+			for(int i = 0; i <= mypoints.size(); i++)
+			{
+				point temp;
+				temp.x = mypoints[i].x;
+				temp.y = mypoints[i].y;
+				temp.inRoute = false;
+				pointArray.push_back(temp);
+			}
+		}
+>>>>>>> 2de5fbf7f8443adc65287d70f8f851e1ed4ee16d
 
 	//create a time stamped transform so that we can also get previous positions and possible future positions
 	tf::StampedTransform transform;
@@ -120,7 +132,16 @@ int main(int argc, char **argv)
 		{
 			std::cout << "reached location:" << std::endl;
 			//play sound
+<<<<<<< HEAD
 			sc.playWave("/Home/ros/P1-Project/src/p1_turtlebot_pkg/src/crow_call_2.wav", 1.0f);
+=======
+			sc.playWave("/home/ros/P1-Project/src/p1_turtlebot_pkg/src/Crow_Call_2.wav", 1.0f);
+			
+			if(count <= 100)
+			{
+				count++;
+			}
+>>>>>>> 2de5fbf7f8443adc65287d70f8f851e1ed4ee16d
 		}
 		else
 		{

@@ -16,6 +16,7 @@ find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
   message_generation
   sound_play
+  nav_msgs
 )
 ## ACTION LIBRARY
 find_package(catkin REQUIRED genmsg actionlib_msgs actionlib)
@@ -64,6 +65,7 @@ actionlib_msgs
 visualization_msgs
 geometry_msgs
 std_msgs
+nav_msgs
 )
 
 
@@ -151,7 +153,7 @@ target_link_libraries(generate_points_node
  )
  target_link_libraries(tree_gen_old_node
    ${catkin_LIBRARIES}
- )
+)
 
 #############
 ## Install ##
