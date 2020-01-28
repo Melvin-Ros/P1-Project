@@ -51,7 +51,6 @@ int main(int argc, char **argv)
 		/* code */
 	while(mypoints.size()<=1)
 	{
-		cout << "waiting for publisher"<< endl;
 		ros::spinOnce();
     	loop_rate.sleep();
 	}

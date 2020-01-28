@@ -1,0 +1,7 @@
+<launch> 
+ 	<node name="generate_points_node" pkg="p1_turtlebot_pkg" type="generate_points_node" output="screen">
+     	</node>
+
+	<node name="generate_route_node" pkg="p1_turtlebot_pkg" type="generate_route_node" output="screen">
+     	</node>
+</launch>
